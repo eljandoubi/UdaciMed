@@ -13,14 +13,14 @@ Key features:
     - Clinical-focused training with early stopping and monitoring
 """
 
-from typing import Any, Dict, Optional, Tuple, Union
+from pathlib import Path
+from typing import Any, Dict, Tuple
 
 import matplotlib.pyplot as plt
-import tqdm
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import tqdm
 from torchvision.models import ResNet18_Weights, resnet18
 
 
@@ -369,9 +369,10 @@ def train_baseline_model(model: ResNetBaseline, train_loader, val_loader, device
         ...     model, train_loader, val_loader, 'cuda', config
         ... )
     """
-    print(f"Starting baseline model training for pneumonia detection...")
+    print("Starting baseline model training for pneumonia detection...")
     print(f"   Config: {config['num_epochs']} epochs, lr={config['learning_rate']}, wd={config['weight_decay']}")
     
+    Path(save_path).parent.mkdir(parents=True, exist_ok=True)
     # Setup training components optimized for medical imaging
     criterion = nn.CrossEntropyLoss()  # Standard for binary classification
     optimizer = torch.optim.AdamW(
@@ -545,7 +546,7 @@ def plot_training_history(history: Dict[str, list]) -> None:
     plt.show()
     
     # Training summary for clinical reporting
-    print(f"\nTraining Summary:")
+    print("\nTraining Summary:")
     print(f"   Best Validation Accuracy: {max(history['val_acc']):.1f}%")
     print(f"   Total Epochs: {len(epochs)}")
     print(f"   Final Training Accuracy: {history['train_acc'][-1]:.1f}%")

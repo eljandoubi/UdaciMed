@@ -109,7 +109,6 @@ def create_optimized_model(
 # --------------------------------------
 
 
-# TODO: Implement this optimization method, if selected in your optimization strategy
 def apply_interpolation_removal_optimization(
     model: nn.Module, native_size: int = 64
 ) -> nn.Module:
@@ -193,7 +192,6 @@ def apply_interpolation_removal_optimization(
 # --------------------------------------
 
 
-# TODO: Implement this optimization method, if selected in your optimization strategy
 def apply_depthwise_separable_optimization(
     model: nn.Module,
     layer_names: Optional[List[str]] = None,
@@ -233,13 +231,6 @@ def apply_depthwise_separable_optimization(
     replacements = 0  # Track number of successful replacements
 
     print("Applying depthwise separable convolution optimization...")
-
-    # TODO: Update the model to use depthwise separable convolution instead of convolution.
-    # HINT: To transform a conv2d into depthwise separable, you need to convolve each channel with its own kernel (groups=in_channels) for depthwise,
-    # and then combine information across channels processed by depthwise layer to define the pointwise layer.
-    # Note that a conv2d block is also composed by activation and batchnorm in ResNet - Do you want to keep both, either, or none in?
-    # Also, think about how the residuals are handled.
-    # See https://www.paepper.com/blog/posts/depthwise-separable-convolutions-in-pytorch/ for an intuitive explanation and code template.
 
     def _make_dw_sep(conv: nn.Conv2d) -> nn.Sequential:
         """Return a depthwise → pointwise replacement for *conv*."""
@@ -322,7 +313,6 @@ def apply_depthwise_separable_optimization(
 # --------------------------------------
 
 
-# TODO: Implement this optimization method, if selected in your optimization strategy
 def apply_grouped_convolution_optimization(
     model: nn.Module,
     groups: int = 2,
@@ -361,11 +351,6 @@ def apply_grouped_convolution_optimization(
     skipped = 0
 
     print(f"Applying grouped convolution optimization (groups={groups})...")
-
-    # TODO: Convert suitable Conv2d layers to grouped convolutions.
-    # HINT: Grouped convolution divides input channels into independent groups and applies separate
-    # convolutions to each group. To make this happen, you need to ensure that the later is suitable for this transformation.
-    # See https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html for how to use the group parameter.
 
     candidates = []
     for parent_module in optimized_model.modules():
@@ -434,7 +419,6 @@ def apply_grouped_convolution_optimization(
 # --------------------------------------
 
 
-# TODO: Implement this optimization method, if selected in your optimization strategy
 def apply_inverted_residual_optimization(
     model: nn.Module, target_layers: Optional[List[str]] = None, expand_ratio: int = 6
 ) -> nn.Module:
@@ -466,14 +450,6 @@ def apply_inverted_residual_optimization(
     replacements = 0  # Track number of successful replacements
 
     print("Applying mobile inverted residual optimization...")
-
-    # TODO: Replaces suitable blocks in the model with InvertedResidual blocks.
-    # HINT: Inverted residuals use an expand→depthwise→project pattern as used in MobileNetV2.
-    # The "inverted" aspect means we expand channels first (unlike standard residuals that compress).
-    # Architecture flow: input → [expand] → depthwise → project → [+residual]
-    #
-    # Check the MobileNetV2 code at https://github.com/tonylins/pytorch-mobilenet-v2/blob/master/MobileNetV2.py
-    # for a code template, and consider whether to use ReLU or ReLU6 and batchnorm.
 
     class InvertedResidual(nn.Module):
         """MobileNetV2-style inverted residual block."""
@@ -584,7 +560,6 @@ def apply_inverted_residual_optimization(
 # --------------------------------------
 
 
-# TODO: Implement this optimization method, if selected in your optimization strategy
 def apply_lowrank_factorization(
     model: nn.Module, min_params: int = 10_000, rank_ratio: float = 0.25
 ) -> nn.Module:
@@ -616,14 +591,6 @@ def apply_lowrank_factorization(
     replacements = 0  # Track number of successful replacements
 
     print("Applying low-rank factorization optimization...")
-
-    # TODO: Factorizes large linear layers into low-rank approximations.
-    # HINT: Low-rank factorization decomposes a large weight matrix W into two smaller matrices U and V
-    # such that W ≈ U @ V. This dramatically reduces parameters while maintaining representational capacity.
-    # Remember that higher rank = better approximation but less compression
-    #
-    # See https://arikpoz.github.io/posts/2025-04-29-low-rank-factorization-in-pytorch-compressing-neural-networks-with-linear-algebra/
-    # for explanation and code template, and consider how to initialize parameters with respect to the new rank.
 
     class LowRankLinear(nn.Module):
         """Factorized replacement for nn.Linear: W ≈ V @ U."""
@@ -692,7 +659,6 @@ def apply_lowrank_factorization(
 # --------------------------------------
 
 
-# TODO: Implement this optimization method, if selected in your optimization strategy
 def apply_channel_optimization(
     model: nn.Module,
     enable_channels_last: bool = True,
@@ -726,13 +692,6 @@ def apply_channel_optimization(
 
     print("Applying channel-level hardware optimizations...")
 
-    # TODO: Applies channel-level optimizations such as memory format changes
-    # and in-place ReLU conversions for better hardware efficiency.
-    # HINT: See https://docs.pytorch.org/tutorials/intermediate/memory_format_tutorial.html for a tutorial on channels last organization,
-    # and note how input needs to be handled for it.
-    # Also, consider ensuring activations are in place by reviewing https://discuss.pytorch.org/t/whats-the-difference-between-nn-relu-and-nn-relu-inplace-true/948/2
-    # for more details.
-
     if enable_inplace_relu:
         # Convert all non-inplace ReLU layers to in-place to reduce memory allocations
         for parent_module in optimized_model.modules():
@@ -760,7 +719,6 @@ def apply_channel_optimization(
 # --------------------------------------
 
 
-# TODO: Implement this optimization method, if selected in your optimization strategy
 def apply_parameter_sharing(
     model: nn.Module,
     sharing_groups: Optional[List[List[str]]] = None,
@@ -803,12 +761,6 @@ def apply_parameter_sharing(
     total_parameters_shared = 0
 
     print("Applying parameter sharing optimization...")
-
-    # TODO: Shares parameters between layers in specified groups to reduce memory and computation.
-    # HINT: Parameter sharing involves assigning the same `nn.Parameter` instance to multiple layers
-    #
-    # See https://stackoverflow.com/questions/57929299/how-to-share-weights-between-modules-in-pytorch
-    # for some inspiration.
 
     if sharing_groups is not None:
         # Manual sharing: the caller provides explicit groups of layer full-names
